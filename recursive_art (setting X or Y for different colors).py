@@ -8,7 +8,7 @@ import math
 
 
 
-def build_random_function(min_depth, max_depth):
+def build_random_function(min_depth, max_depth, xOrY): #if xOrY = 0, it takes X - otherwise it takes Y
     """ Builds a random function of depth at least min_depth and depth
         at most max_depth (see assignment writeup for definition of depth
         in this context)
@@ -19,38 +19,78 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # startDepth = random.randint(min_depth,max_depth)
-    if min_depth == 1:
-        n = random.randint(0,1)
-        
-        if n == 0:
-            return lambda x,y: x
-        else:
-            return lambda x,y: y
-    else:
-        n = random.randint(0,7)
-        
-        if n == 0:
-            return lambda x,y: x
-        if n == 1:
-            return lambda x,y: y
-        if n == 2:
-            return lambda x,y: math.cos(math.pi*build_random_function(min_depth-1,max_depth-1)(x,y))
-        if n == 3:
-            return lambda x,y: math.sin(math.pi*build_random_function(min_depth-1,max_depth-1)(x,y))
-        if n == 4:
-            a = build_random_function(min_depth-1,max_depth-1)
-            b = build_random_function(min_depth-1,max_depth-1)
-            return lambda x,y: a(x,y)*b(x,y)
-        if n == 5:
-            a = build_random_function(min_depth-1,max_depth-1)
-            b = build_random_function(min_depth-1,max_depth-1)
-            return lambda x,y: 0.5*(a(x,y) + b(x,y))
-        if n == 6:
-            return lambda x,y: (build_random_function(min_depth-1,max_depth-1)(x,y))**2
-        if n == 7:
-            return lambda x,y: abs((build_random_function(min_depth-1,max_depth-1)(x,y)))**0.5
+    startDepth = random.randint(min_depth,max_depth)
+    buildingBlocks = {
 
+    # 0:(lambda a,b: a * b),
+    # 1:(lambda a,b: 0.5*(a+b)),
+    # 2:(lambda a,b: math.cos(math.pi*a)),
+    # 3:(lambda a,b: math.sin(math.pi*a)),
+    # 4:(lambda a,b: a),
+    # 5:(lambda a,b: b),
+
+    # 6:(lambda a,b: (2.0 * a + b)/3.0),
+    # 7:(lambda a,b: (a + 2.0 * b)/3.0)  
+    }
+
+
+
+    def generator(depth, xOrY):
+        if depth == 1:
+            if xOrY == 0:
+            # n = random.randint(0,1)
+            # if n == 0:
+                return lambda x,y: x
+            else:
+                return lambda x,y: y
+            # else:
+            #     return lambda x,y: y
+        else:
+            n = random.randint(0,5)
+            if n == 0:
+                return lambda x,y: generator(depth-1, xOrY)(x,y)
+            elif n == 1:
+                return lambda x,y: generator(depth-1, xOrY)(x,y)
+            elif n == 2:
+                return lambda x,y: math.cos(math.pi*generator(depth-1, xOrY)(x,y))
+            elif n == 3:
+                return lambda x,y: math.sin(math.pi*generator(depth-1, xOrY)(x,y))
+            elif n == 4:
+                return lambda x,y: generator(depth-1, xOrY)(x,y)*generator(depth-1, xOrY)(x,y)
+            elif n == 5:
+                return lambda x,y: 0.5*(generator(depth-1, xOrY)(x,y) + generator(depth-1, xOrY)(x,y))
+
+    return generator(startDepth, xOrY)
+
+# print build_random_function(7,9)
+# a = 1
+# b = 2
+# a = build_random_function(7,9)
+# print a(1.3,2)
+
+# print x(a,b)
+
+
+
+
+# def evaluate_random_function(f, x, y):
+#     """ Evaluate the random function f with inputs x,y
+#         Representation of the function f is defined in the assignment writeup
+
+#         f: the function to evaluate
+#         x: the value of x to be used to evaluate the function
+#         y: the value of y to be used to evaluate the function
+#         returns: the function value
+
+#         >>> evaluate_random_function(["x"],-0.5, 0.75)
+#         -0.5
+#         >>> evaluate_random_function(["y"],0.1,0.02)
+#         0.02
+#     """
+#     if f == ["x"]:
+#         return x
+#     elif f == ["y"]:
+#         return y
 
 
 def remap_interval(val,
@@ -131,10 +171,15 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = build_random_function(7, 9)
-    green_function = build_random_function(7, 9)
-    blue_function = build_random_function(7, 9)
-
+    red_function = build_random_function(2, 3, 0)
+    green_function = build_random_function(2, 3, 1)
+    blue_function = build_random_function(2, 3, 0)
+    a = red_function
+    b = blue_function
+    c = green_function
+    # print a(1,2)
+    # print b(1,2)
+    # print c(1,2)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -144,9 +189,9 @@ def generate_art(filename, x_size=350, y_size=350):
             x = remap_interval(i, 0, x_size, -1, 1)
             y = remap_interval(j, 0, y_size, -1, 1)
             pixels[i, j] = (
-                    color_map(red_function(x, y)),
-                    color_map(blue_function(x, y)),
-                    color_map(green_function(x, y))
+                    color_map(a(x, y)),
+                    color_map(b(x, y)),
+                    color_map(c(x, y))
                     )
 
     im.save(filename)
@@ -159,7 +204,7 @@ def generate_art(filename, x_size=350, y_size=350):
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-# generate_art("myart9.png",600,600)
+generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
