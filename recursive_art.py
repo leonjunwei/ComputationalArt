@@ -28,16 +28,18 @@ def build_random_function(min_depth, max_depth):
         else:
             return lambda x,y: y
     else:
-        n = random.randint(0,7)
+        n = random.randint(2,7)
         
-        if n == 0:
-            return lambda x,y: x
-        if n == 1:
-            return lambda x,y: y
+        # if n == 0:
+        #     return lambda x,y: x
+        # if n == 1:
+        #     return lambda x,y: y
         if n == 2:
-            return lambda x,y: math.cos(math.pi*build_random_function(min_depth-1,max_depth-1)(x,y))
+            a = build_random_function(min_depth-1,max_depth-1)
+            return lambda x,y: math.cos(math.pi*a(x,y))
         if n == 3:
-            return lambda x,y: math.sin(math.pi*build_random_function(min_depth-1,max_depth-1)(x,y))
+            a = build_random_function(min_depth-1,max_depth-1)
+            return lambda x,y: math.sin(math.pi*a(x,y))
         if n == 4:
             a = build_random_function(min_depth-1,max_depth-1)
             b = build_random_function(min_depth-1,max_depth-1)
@@ -47,9 +49,11 @@ def build_random_function(min_depth, max_depth):
             b = build_random_function(min_depth-1,max_depth-1)
             return lambda x,y: 0.5*(a(x,y) + b(x,y))
         if n == 6:
-            return lambda x,y: (build_random_function(min_depth-1,max_depth-1)(x,y))**2
+            a = build_random_function(min_depth-1,max_depth-1)
+            return lambda x,y: (a(x,y))**2
         if n == 7:
-            return lambda x,y: abs((build_random_function(min_depth-1,max_depth-1)(x,y)))**0.5
+            a = build_random_function(min_depth-1,max_depth-1)
+            return lambda x,y: abs(a(x,y))**0.5
 
 
 
@@ -159,7 +163,7 @@ def generate_art(filename, x_size=350, y_size=350):
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-# generate_art("myart9.png",600,600)
+generate_art("myart15.png",600,600)
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
